@@ -24,3 +24,8 @@ class BookRepository(ABC):
     def get_by_id(self, book_id: int) -> Optional[Book]:
         """Return a book by id or None if not found."""
         raise NotImplementedError
+
+    @abstractmethod
+    def update_by_id(self, book_id: int, data: Dict) -> Optional[Book]:
+        """Update a book by id with provided data and return instance or None if not found."""
+        raise NotImplementedError

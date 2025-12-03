@@ -35,3 +35,25 @@ class DjangoORMBookRepository(BookRepository):
             return Book.objects.get(id=book_id)
         except Book.DoesNotExist:
             return None
+
+    def update_by_id(self, book_id: int, data: Dict) -> Book | None:
+        try:
+            book = Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return None
+
+        for field in [
+            "title",
+            "author",
+            "isbn",
+            "cost_usd",
+            "selling_price_local",
+            "stock_quantity",
+            "category",
+            "supplier_country",
+        ]:
+            if field in data:
+                setattr(book, field, data[field])
+
+        book.save()
+        return book

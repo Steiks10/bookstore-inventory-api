@@ -21,7 +21,7 @@ class DjangoORMBookRepository(BookRepository):
         qs = Book.objects.all().order_by('id')
         if offset is not None:
             if limit is not None:
-                return list(qs[offset:offset + limit])
+                return list(qs[offsedeletet:offset + limit])
             return list(qs[offset:])
         if limit is not None:
             return list(qs[:limit])
@@ -57,3 +57,11 @@ class DjangoORMBookRepository(BookRepository):
 
         book.save()
         return book
+
+    def delete_by_id(self, book_id: int) -> bool:
+        try:
+            book = Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return False
+        book.delete()
+        return True

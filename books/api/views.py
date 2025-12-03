@@ -18,6 +18,7 @@ from ..application.use_cases.create_book import create_book
 from ..application.use_cases.list_books import list_books
 from ..application.use_cases.get_book import get_book_by_id
 from ..application.use_cases.update_book import update_book_by_id
+from ..application.use_cases.delete_book import delete_book_by_id
 from ..controllers.container import book_repository_provider
 
 
@@ -194,6 +195,18 @@ class BookView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except IntegrityError as e:
             return Response({"detail": "Datos inválidos o duplicados", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except DatabaseError as e:
+            return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as e:
+            return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, id: int):
+        try:
+            repo = book_repository_provider.get()
+            deleted = delete_book_by_id(repo, id)
+            if not deleted:
+                return Response({"detail": "Libro no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except DatabaseError as e:
             return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except Exception as e:

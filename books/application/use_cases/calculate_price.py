@@ -1,4 +1,5 @@
 from urllib.error import URLError
+from datetime import datetime, timezone
 
 def calculate_suggested_price(cost_usd: float, rate: float, margin_percent: float = 0.0) -> float:
     return float(cost_usd) * float(rate) * (1.0 + (float(margin_percent) / 100.0))
@@ -22,6 +23,7 @@ def calculate_price_for_book(repository, rates_provider, book_id: int, currency:
 
     rate = float(rates[currency])
     suggested = calculate_suggested_price(dto.cost_usd, rate, margin_percent)
+    cost_local = float(dto.cost_usd) * rate
 
     saved = False
     if save:
@@ -30,11 +32,12 @@ def calculate_price_for_book(repository, rates_provider, book_id: int, currency:
 
     result = {
         'book_id': dto.id,
+        'cost_usd': float(dto.cost_usd),
+        'exchange_rate': rate,
+        'cost_local': cost_local,
+        'margin_percentage': float(margin_percent or 0.0),
+        'selling_price_local': suggested,
         'currency': currency,
-        'rate': rate,
-        'base_cost_usd': float(dto.cost_usd),
-        'margin_percent': float(margin_percent or 0.0),
-        'suggested_price_local': suggested,
-        'saved': saved,
+        'calculation_timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
     }
     return result, None

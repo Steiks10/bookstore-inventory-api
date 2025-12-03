@@ -4,6 +4,12 @@ Proyecto Django REST Framework para gestionar libros con una arquitectura limpia
 
 ## Cómo ejecutar
 
+### Pasos previos: Clonar el repositorio
+- Clona y entra al proyecto:
+	- `git clone https://github.com/Steiks10/bookstore-inventory-api.git`
+	- `cd bookstore-inventory-api`
+
+
 ### Opción A: Docker Compose
 - Requisitos: Docker y Docker Compose.
 - Pasos:

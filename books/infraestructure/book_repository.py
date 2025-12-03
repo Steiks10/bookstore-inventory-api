@@ -16,3 +16,16 @@ class DjangoORMBookRepository(BookRepository):
             category=data.get("category"),
             supplier_country=data.get("supplier_country"),
         )
+    
+    def list(self, offset: int | None = None, limit: int | None = None):
+        qs = Book.objects.all().order_by('id')
+        if offset is not None:
+            if limit is not None:
+                return list(qs[offset:offset + limit])
+            return list(qs[offset:])
+        if limit is not None:
+            return list(qs[:limit])
+        return list(qs)
+
+    def count(self) -> int:
+        return Book.objects.count()

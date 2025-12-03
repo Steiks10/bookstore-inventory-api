@@ -21,6 +21,8 @@ from ..application.use_cases.update_book import update_book_by_id
 from ..application.use_cases.delete_book import delete_book_by_id
 from ..application.use_cases.search_books_by_category import search_books_by_category
 from ..application.use_cases.list_low_stock_books import list_low_stock_books
+from ..application.use_cases.calculate_price import calculate_price_for_book
+from ..controllers.container import rates_provider_provider
 from ..controllers.container import book_repository_provider
 
 
@@ -39,6 +41,7 @@ class BooksView(APIView):
             page = int(page) if page is not None else None
             page_size = int(page_size) if page_size is not None else None
             repo = book_repository_provider.get()
+            rates = rates_provider_provider.get()
             dto = list_books(repository=repo, page=page, page_size=page_size)
             # manual dict serialization to avoid importing asdict in the view
             data = {
@@ -169,15 +172,6 @@ class BookView(APIView):
           serializer = BookSerializer(instance=existing, data=request.data, partial=True)
           if not serializer.is_valid():
               return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-          # Prevent duplicate ISBN when changing it (exclude current id)
-          isbn = serializer.validated_data.get("isbn")
-          print("existing.isbn:", existing.isbn)
-          print("existing.isbn:", isbn)
-          if isbn is not None and existing.isbn != isbn:
-              from ..domain.book import Book as BookModel
-              if BookModel.objects.filter(isbn=isbn).exclude(id=id).exists():
-                  return Response({"isbn": ["Ya existe un libro con el mismo ISBN"]}, status=status.HTTP_400_BAD_REQUEST)
 
           dto = update_book_by_id(repo, id, serializer.validated_data)
           if dto is None:
@@ -313,6 +307,62 @@ class BookLowStockView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except ValueError:
             return Response({'detail': 'threshold, page y page_size deben ser enteros válidos'}, status=status.HTTP_400_BAD_REQUEST)
+        except DatabaseError as e:
+            return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as e:
+            return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BookCalculatePriceView(APIView):
+    @extend_schema(
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'currency': {'type': 'string', 'description': 'Código de moneda destino (ej. PEN, MXN, EUR)'},
+                    'margin_percent': {'type': 'number', 'description': 'Margen porcentual a aplicar (ej. 20 para 20%)', 'default': 0},
+                    'save': {'type': 'boolean', 'description': 'Si true, guarda en selling_price_local', 'default': False},
+                },
+                'required': ['currency']
+            }
+        },
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'book_id': {'type': 'integer'},
+                    'currency': {'type': 'string'},
+                    'rate': {'type': 'number'},
+                    'base_cost_usd': {'type': 'number'},
+                    'margin_percent': {'type': 'number'},
+                    'suggested_price_local': {'type': 'number'},
+                    'saved': {'type': 'boolean'},
+                }
+            }
+        },
+        examples=[
+            OpenApiExample(
+                'Calcular precio sugerido',
+                value={'currency': 'PEN', 'margin_percent': 0, 'save': True},
+                request_only=True,
+            )
+        ]
+    )
+    def post(self, request, id: int):
+        try:
+            repo = book_repository_provider.get()
+            rates = rates_provider_provider.get()
+            currency = request.data.get('currency')
+            margin_percent = float(request.data.get('margin_percent', 0) or 0)
+            save_flag = bool(request.data.get('save', False))
+            if not currency:
+                return Response({"detail": "currency es requerido"}, status=status.HTTP_400_BAD_REQUEST)
+
+            result, err = calculate_price_for_book(repo, rates, id, currency, margin_percent, save_flag)
+            if err is not None:
+                status_code = err.pop('status', 400)
+                return Response(err, status=status_code)
+            return Response(result, status=status.HTTP_200_OK)
         except DatabaseError as e:
             return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except Exception as e:

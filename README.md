@@ -37,7 +37,7 @@ Notas:
 	3. Aplicar migraciones:
 		 - `python manage.py makemigrations`
 		 - `python manage.py migrate`
-	4. (Opcional) Sembrar datos de ejemplo:
+	4. (Opcional) Insertar datos de ejemplo en la base de datos:
 		 - `python manage.py seed_books`
 	5. Ejecutar servidor:
 		 - `python manage.py runserver`
@@ -90,5 +90,7 @@ El proyecto sigue una arquitectura limpia (Clean Architecture) con separación p
 
 ## Postman
 - Archivo `postman_collection.json` con ejemplos para todos los endpoints.
+
+Nota: asegurese que en los metodos PUT o POST al final de la url tenga /
 
 Muchas gracias:D

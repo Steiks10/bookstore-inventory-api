@@ -15,7 +15,7 @@ Proyecto Django REST Framework para gestionar libros con una arquitectura limpia
 - Pasos:
 	1. Construir y levantar servicios:
 		 - `docker compose up --build`
-	2. La app corre en `http://localhost:8000/` y redirige a `/docs/`.
+	2. La app corre en `http://localhost:8000/` y redirige a `/docs/` donde está la documentación con Swagger
 
 Notas:
 - Si ves errores de migración por “table already exists”, finge la inicial: `docker compose run --rm web bash -lc "python manage.py migrate --fake-initial || python manage.py migrate"`.
@@ -91,7 +91,7 @@ El proyecto sigue una arquitectura limpia (Clean Architecture) con separación p
 	- `/docs/`: Swagger UI.
 	- `/redoc/`: Redoc.
 
-## Semillas de datos
+## Insertar de datos
 - Comando: `python manage.py seed_books` (idempotente, crea libros de ejemplo si no existen).
 
 ## Postman

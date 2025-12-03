@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Django
+/static/
+/media/
+
+# VCS
+.git/
+.gitignore
+
+# Editor/IDE
+.vscode/
+*.swp
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Environments
+.env
+venv/
+.venv/
+*/dj-env/
+
+# Tests/coverage
+.coverage
+htmlcov/
+
+# Misc
+*.log
+node_modules/

@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookstore-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=bookstore.settings
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    command: bash -lc "python manage.py migrate --fake-initial || python manage.py migrate; python manage.py seed_books; python manage.py runserver 0.0.0.0:8000"
+    restart: unless-stopped

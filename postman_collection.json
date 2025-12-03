@@ -6,26 +6,12 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://127.0.0.1:8000",
-      "type": "string"
-    },
-    {
-      "key": "page",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "page_size",
-      "value": "10",
-      "type": "string"
-    },
-    {
-      "key": "book_id",
-      "value": "1",
-      "type": "string"
-    }
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000", "type": "string" },
+    { "key": "page", "value": "1", "type": "string" },
+    { "key": "page_size", "value": "10", "type": "string" },
+    { "key": "book_id", "value": "1", "type": "string" },
+    { "key": "category", "value": "Literatura", "type": "string" },
+    { "key": "threshold", "value": "10", "type": "string" }
   ],
   "item": [
     {
@@ -33,16 +19,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/books/",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "books"
-          ]
-        }
+        "url": { "raw": "{{baseUrl}}/api/books/", "host": ["{{baseUrl}}"], "path": ["api", "books"] }
       }
     },
     {
@@ -52,22 +29,11 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/books/?page={{page}}&page_size={{page_size}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "books"
-          ],
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "books"],
           "query": [
-            {
-              "key": "page",
-              "value": "{{page}}"
-            },
-            {
-              "key": "page_size",
-              "value": "{{page_size}}"
-            }
+            { "key": "page", "value": "{{page}}" },
+            { "key": "page_size", "value": "{{page_size}}" }
           ]
         }
       }
@@ -77,43 +43,85 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/books/{{book_id}}/",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "books",
-            "{{book_id}}"
-          ]
-        }
+        "url": { "raw": "{{baseUrl}}/api/books/{{book_id}}/", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{book_id}}"] }
       }
     },
     {
       "name": "Create Book",
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"title\": \"El Quijote\",\n  \"author\": \"Miguel de Cervantes\",\n  \"isbn\": \"978-84-376-0494-7\",\n  \"cost_usd\": \"15.99\",\n  \"selling_price_local\": null,\n  \"stock_quantity\": 25,\n  \"category\": \"Literatura Clásica\",\n  \"supplier_country\": \"ES\"\n}"
         },
+        "url": { "raw": "{{baseUrl}}/api/books/", "host": ["{{baseUrl}}"], "path": ["api", "books"] }
+      }
+    },
+    {
+      "name": "Update Book",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"El Quijote (Edición Revisada)\",\n  \"author\": \"Miguel de Cervantes\",\n  \"isbn\": \"978-84-376-0494-7\",\n  \"cost_usd\": \"17.99\",\n  \"selling_price_local\": null,\n  \"stock_quantity\": 30,\n  \"category\": \"Literatura Clásica\",\n  \"supplier_country\": \"ES\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/books/{{book_id}}/", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{book_id}}"] }
+      }
+    },
+    {
+      "name": "Delete Book",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/books/{{book_id}}/", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{book_id}}"] }
+      }
+    },
+    {
+      "name": "Search Books by Category",
+      "request": {
+        "method": "GET",
+        "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/books/",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "books"
+          "raw": "{{baseUrl}}/api/books/search/?category={{category}}&page={{page}}&page_size={{page_size}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "books", "search"],
+          "query": [
+            { "key": "category", "value": "{{category}}" },
+            { "key": "page", "value": "{{page}}" },
+            { "key": "page_size", "value": "{{page_size}}" }
           ]
         }
+      }
+    },
+    {
+      "name": "List Low Stock Books",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/books/low-stock/?threshold={{threshold}}&page={{page}}&page_size={{page_size}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "books", "low-stock"],
+          "query": [
+            { "key": "threshold", "value": "{{threshold}}" },
+            { "key": "page", "value": "{{page}}" },
+            { "key": "page_size", "value": "{{page_size}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Calculate Suggested Price",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currency\": \"PEN\",\n  \"margin_percent\": 25,\n  \"save\": true\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/books/{{book_id}}/calculate-price/", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{book_id}}", "calculate-price"] }
       }
     }
   ]

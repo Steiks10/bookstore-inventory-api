@@ -16,6 +16,7 @@ from django.db import IntegrityError, DatabaseError
 from .serializers import BookSerializer
 from ..application.use_cases.create_book import create_book
 from ..application.use_cases.list_books import list_books
+from ..application.use_cases.get_book import get_book_by_id
 from ..controllers.container import book_repository_provider
 
 
@@ -101,4 +102,31 @@ class BookCreateView(APIView):
             return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except Exception as e:
             # Unexpected server error
+            return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BookDetailView(APIView):
+    def get(self, request, id: int):
+        try:
+            repo = book_repository_provider.get()
+            dto = get_book_by_id(repo, id)
+            if dto is None:
+                return Response({"detail": "Libro no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            data = {
+                'id': dto.id,
+                'title': dto.title,
+                'author': dto.author,
+                'isbn': dto.isbn,
+                'cost_usd': dto.cost_usd,
+                'selling_price_local': dto.selling_price_local,
+                'stock_quantity': dto.stock_quantity,
+                'category': dto.category,
+                'supplier_country': dto.supplier_country,
+                'created_at': dto.created_at,
+                'updated_at': dto.updated_at,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except DatabaseError as e:
+            return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

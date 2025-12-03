@@ -29,3 +29,9 @@ class DjangoORMBookRepository(BookRepository):
 
     def count(self) -> int:
         return Book.objects.count()
+
+    def get_by_id(self, book_id: int) -> Book | None:
+        try:
+            return Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return None

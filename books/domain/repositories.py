@@ -19,3 +19,8 @@ class BookRepository(ABC):
     def count(self) -> int:
         """Return total number of books."""
         raise NotImplementedError
+
+    @abstractmethod
+    def get_by_id(self, book_id: int) -> Optional[Book]:
+        """Return a book by id or None if not found."""
+        raise NotImplementedError

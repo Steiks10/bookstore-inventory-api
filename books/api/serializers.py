@@ -22,11 +22,12 @@ class BookSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         isbn = attrs.get('isbn')
         if isbn:
-            # Chequear duplicados por ISBN exacto (como se guarda)
-            if Book.objects.filter(isbn=isbn).exists():
-                raise serializers.ValidationError({
-                    'isbn': 'Ya existe un libro con el mismo ISBN'
-                })
+            # En update, excluir el propio registro (self.instance) del chequeo de duplicado
+            qs = Book.objects.filter(isbn=isbn)
+            if self.instance is not None and getattr(self.instance, 'id', None) is not None:
+                qs = qs.exclude(id=self.instance.id)
+            if qs.exists():
+                raise serializers.ValidationError({'isbn': 'Ya existe un libro con el mismo ISBN'})
         return attrs
 
     class Meta:

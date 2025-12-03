@@ -39,3 +39,8 @@ class BookRepository(ABC):
     def search_by_category(self, category: str, offset: Optional[int] = None, limit: Optional[int] = None) -> List[Book]:
         """Search books by category with optional pagination."""
         raise NotImplementedError
+
+    @abstractmethod
+    def list_low_stock(self, threshold: int, offset: Optional[int] = None, limit: Optional[int] = None) -> List[Book]:
+        """List books with stock_quantity less than threshold, optional pagination."""
+        raise NotImplementedError

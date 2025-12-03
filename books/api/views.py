@@ -27,6 +27,7 @@ from ..controllers.container import book_repository_provider
 
 
 class BooksView(APIView):
+    # GET /api/books/ - Lista libros (opcional paginación)
     @extend_schema(
         parameters=[
             OpenApiParameter(name='page', description='Número de página (>=1)', required=False, type=int),
@@ -73,6 +74,7 @@ class BooksView(APIView):
         except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+            # POST /api/books/ - Crea un libro
     @extend_schema(
         request=BookSerializer,
         responses={201: BookSerializer},
@@ -115,6 +117,7 @@ class BooksView(APIView):
 
 
 class BookView(APIView):
+    # GET /api/books/{id}/ - Obtiene un libro por ID
     def get(self, request, id: int):
         try:
             repo = book_repository_provider.get()
@@ -140,6 +143,7 @@ class BookView(APIView):
         except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            # PUT /api/books/{id}/ - Actualiza parcialmente un libro
     @extend_schema(
         request=BookSerializer,
         responses={200: BookSerializer},
@@ -198,6 +202,7 @@ class BookView(APIView):
         except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+            # DELETE /api/books/{id}/ - Elimina un libro
     def delete(self, request, id: int):
         try:
             repo = book_repository_provider.get()
@@ -213,6 +218,7 @@ class BookView(APIView):
 
 
 class BookSearchView(APIView):
+    # GET /api/books/search/?category= - Busca libros por categoría (paginable)
     @extend_schema(
         parameters=[
             OpenApiParameter(name='category', description='Categoría a buscar', required=True, type=str),
@@ -263,6 +269,7 @@ class BookSearchView(APIView):
 
 
 class BookLowStockView(APIView):
+    # GET /api/books/low-stock/?threshold= - Lista libros con stock bajo (paginable)
     @extend_schema(
         parameters=[
             OpenApiParameter(name='threshold', description='Umbral de stock (mostrar menores a este valor)', required=True, type=int),
@@ -314,6 +321,7 @@ class BookLowStockView(APIView):
 
 
 class BookCalculatePriceView(APIView):
+    # POST /api/books/{id}/calculate-price/ - Calcula precio sugerido y opcionalmente guarda
     @extend_schema(
         request={
             'application/json': {

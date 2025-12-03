@@ -34,3 +34,8 @@ class BookRepository(ABC):
     def delete_by_id(self, book_id: int) -> bool:
         """Delete a book by id. Return True if deleted, False if not found."""
         raise NotImplementedError
+
+    @abstractmethod
+    def search_by_category(self, category: str, offset: Optional[int] = None, limit: Optional[int] = None) -> List[Book]:
+        """Search books by category with optional pagination."""
+        raise NotImplementedError

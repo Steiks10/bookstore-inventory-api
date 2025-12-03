@@ -65,3 +65,13 @@ class DjangoORMBookRepository(BookRepository):
             return False
         book.delete()
         return True
+
+    def search_by_category(self, category: str, offset: int | None = None, limit: int | None = None):
+        qs = Book.objects.filter(category__icontains=category).order_by('id')
+        if offset is not None:
+            if limit is not None:
+                return list(qs[offset:offset + limit])
+            return list(qs[offset:])
+        if limit is not None:
+            return list(qs[:limit])
+        return list(qs)

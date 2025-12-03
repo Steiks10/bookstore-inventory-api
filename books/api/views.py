@@ -19,6 +19,7 @@ from ..application.use_cases.list_books import list_books
 from ..application.use_cases.get_book import get_book_by_id
 from ..application.use_cases.update_book import update_book_by_id
 from ..application.use_cases.delete_book import delete_book_by_id
+from ..application.use_cases.search_books_by_category import search_books_by_category
 from ..controllers.container import book_repository_provider
 
 
@@ -199,7 +200,7 @@ class BookView(APIView):
             return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
     def delete(self, request, id: int):
         try:
             repo = book_repository_provider.get()
@@ -211,3 +212,56 @@ class BookView(APIView):
             return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except Exception as e:
             return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+class BookSearchView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='category', description='Categoría a buscar', required=True, type=str),
+            OpenApiParameter(name='page', description='Número de página (>=1)', required=False, type=int),
+            OpenApiParameter(name='page_size', description='Tamaño de página (>=1)', required=False, type=int),
+        ],
+        responses={200: BookSerializer(many=True)},
+    )
+    def get(self, request):
+        try:
+            category = request.query_params.get('category')
+            if category is None or category.strip() == '':
+                return Response({'detail': 'category es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+            page = request.query_params.get('page')
+            page_size = request.query_params.get('page_size')
+            page = int(page) if page is not None else None
+            page_size = int(page_size) if page_size is not None else None
+            repo = book_repository_provider.get()
+            dto = search_books_by_category(repository=repo, category=category, page=page, page_size=page_size)
+            data = {
+                'items': [
+                    {
+                        'id': book.id,
+                        'title': book.title,
+                        'author': book.author,
+                        'isbn': book.isbn,
+                        'cost_usd': book.cost_usd,
+                        'selling_price_local': book.selling_price_local,
+                        'stock_quantity': book.stock_quantity,
+                        'category': book.category,
+                        'supplier_country': book.supplier_country,
+                        'created_at': book.created_at,
+                        'updated_at': book.updated_at,
+                    } for book in dto.items
+                ],
+                'total': dto.total,
+                'page': dto.page,
+                'page_size': dto.page_size,
+                'total_pages': dto.total_pages,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except ValueError:
+            return Response({'detail': 'page y page_size deben ser enteros positivos'}, status=status.HTTP_400_BAD_REQUEST)
+        except DatabaseError as e:
+            return Response({"detail": "Servicio de base de datos no disponible", "error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as e:
+            return Response({"detail": "Error interno del servidor", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
